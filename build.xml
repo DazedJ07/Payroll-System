@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="StaffPayrollSystem" default="run" basedir=".">
+    <description>Staff Timekeeping and Payroll Desktop Application</description>
+
+    <property name="src.dir" location="src"/>
+    <property name="build.dir" location="build"/>
+    <property name="classes.dir" location="${build.dir}/classes"/>
+    <property name="dist.dir" location="dist"/>
+    <property name="main-class" value="payroll.Main"/>
+
+    <target name="init">
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="init" description="compile the source">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false" debug="true"/>
+    </target>
+
+    <target name="jar" depends="compile" description="package as runnable JAR">
+        <jar jarfile="${dist.dir}/StaffPayrollSystem.jar" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="compile" description="run the application">
+        <java classname="${main-class}" fork="true">
+            <classpath>
+                <pathelement path="${classes.dir}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="clean" description="clean up build files">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+</project>

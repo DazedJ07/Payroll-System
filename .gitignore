@@ -1,0 +1,16 @@
+# Build output
+bin/
+build/
+dist/
+.tools/
+
+# IDE files
+nbproject/private/
+.nb-gradle/
+.idea/
+*.iml
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
