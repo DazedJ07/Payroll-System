@@ -4,9 +4,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
- * Main - Entry point for Staff Timekeeping and Payroll Desktop Application.
- * Configures system look-and-feel, initializes data storage files, and launches LoginFrame.
- */
+Main - Entry point for Staff Timekeeping and Payroll Desktop Application.
+Configures system look-and-feel, initializes data storage files, and launches LoginFrame.
+*/
 public class Main {
 
     public static void main(String[] args) {

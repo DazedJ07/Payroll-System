@@ -20,27 +20,26 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-/**
- * LoginFrame - Authentication window for Staff Timekeeping and Payroll System.
- * Supports Admin, Supervisor, and Staff roles with credentials stored in users.txt.
- */
+/*
+LoginFrame - Authentication window for Staff Timekeeping and Payroll System.
+Supports Admin, Supervisor, and Staff roles with credentials stored in users.txt.
+*/
 public class LoginFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
     private JTextField txtUsername;
-    private JPasswordField txtPassword;
+    private PasswordFieldWithToggle passwordInput;
     private JButton btnLogin;
     private JButton btnExit;
 
     public LoginFrame() {
         setTitle("Staff Timekeeping & Payroll System - Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(480, 420);
+        setSize(480, 360);
         setLocationRelativeTo(null);
         setResizable(false);
 
@@ -87,9 +86,9 @@ public class LoginFrame extends JFrame {
         lblPassword.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblPassword.setForeground(new Color(51, 65, 85));
 
-        txtPassword = new JPasswordField(18);
-        txtPassword.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtPassword.setPreferredSize(new Dimension(200, 32));
+        passwordInput = new PasswordFieldWithToggle(18);
+        passwordInput.getPasswordField().setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        passwordInput.getPasswordField().setPreferredSize(new Dimension(200, 32));
 
         // Add Enter key listener to login automatically
         KeyAdapter enterKeyListener = new KeyAdapter() {
@@ -101,7 +100,7 @@ public class LoginFrame extends JFrame {
             }
         };
         txtUsername.addKeyListener(enterKeyListener);
-        txtPassword.addKeyListener(enterKeyListener);
+        passwordInput.getPasswordField().addKeyListener(enterKeyListener);
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.3;
         formPanel.add(lblUsername, gbc);
@@ -111,7 +110,7 @@ public class LoginFrame extends JFrame {
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.3;
         formPanel.add(lblPassword, gbc);
         gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 0.7;
-        formPanel.add(txtPassword, gbc);
+        formPanel.add(passwordInput, gbc);
 
         // Buttons Panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -150,34 +149,15 @@ public class LoginFrame extends JFrame {
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
-        // Bottom Demo Credentials Hint Box
-        JPanel hintPanel = new JPanel(new BorderLayout());
-        hintPanel.setBackground(new Color(238, 242, 255));
-        hintPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(199, 210, 254), 1),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
-
-        JLabel lblHintTitle = new JLabel("<html><b>Default Demo Accounts:</b><br/>"
-                + "• Admin: <code>admin</code> / <code>admin123</code><br/>"
-                + "• Supervisor: <code>super</code> / <code>super123</code><br/>"
-                + "• Staff: <code>staff</code> / <code>staff123</code></html>");
-        lblHintTitle.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblHintTitle.setForeground(new Color(67, 56, 202));
-        hintPanel.add(lblHintTitle, BorderLayout.CENTER);
-
-        mainPanel.add(hintPanel, BorderLayout.SOUTH);
-
         setContentPane(mainPanel);
     }
 
     /**
-     * User-defined method: authenticates user by comparing against records in users.txt.
-     *
-     * @param username username entered
-     * @param password password entered
-     * @return User object if match found, null otherwise
-     */
+    User-defined method: authenticates user by comparing against records in users.txt.
+    @param username username entered
+    @param password password entered
+    @return User object if match found, null otherwise
+    */
     public FileHelper.User authenticateUser(String username, String password) {
         if (username == null || password == null) {
             return null;
@@ -185,21 +165,21 @@ public class LoginFrame extends JFrame {
 
         List<FileHelper.User> users = FileHelper.loadUsersFromFile();
         for (FileHelper.User u : users) {
-            if (u.getUsername().equalsIgnoreCase(username.trim()) && u.getPassword().equals(password.trim())) {
+            if (u.getUsername().equalsIgnoreCase(username.trim()) && u.getPassword().equals(password)) {
                 return u;
             }
         }
         return null;
     }
 
-    /**
-     * Handles login action, shows welcome or error dialog, and navigates to DashboardFrame.
-     */
+    /*
+    Handles login action, shows welcome or error dialog, and navigates to DashboardFrame.
+    */
     private void processLogin() {
         String username = txtUsername.getText().trim();
-        String password = new String(txtPassword.getPassword()).trim();
+        String password = new String(passwordInput.getPassword());
 
-        if (username.isEmpty() || password.isEmpty()) {
+        if (username.isEmpty() || password.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Please enter both username and password.",
                     "Input Error",
@@ -223,8 +203,8 @@ public class LoginFrame extends JFrame {
                     "Invalid username or password.\nPlease check your credentials and try again.",
                     "Login Failed",
                     JOptionPane.ERROR_MESSAGE);
-            txtPassword.setText("");
-            txtPassword.requestFocus();
+            passwordInput.getPasswordField().setText("");
+            passwordInput.getPasswordField().requestFocus();
         }
     }
 }

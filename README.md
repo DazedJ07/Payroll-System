@@ -15,12 +15,13 @@ Payroll/
 │   └── timelogs.txt                      # Shift clock records & calculated pay
 ├── paystubs/                             # Pay stub backup text receipts (auto-created)
 └── src/
-    └── payroll/                          # Main application package (5 core classes)
+    └── payroll/                          # Main application package
         ├── Main.java                     # Application entry point & L&F setup
         ├── LoginFrame.java               # Authentication window & role-based routing
         ├── DashboardFrame.java           # Staff, Supervisor & Admin tabbed views
         ├── FileHelper.java               # FileReader / FileWriter persistence engine
-        └── PayrollCalculator.java        # Dedicated mathematical calculation engine
+        ├── PayrollCalculator.java        # Dedicated mathematical calculation engine
+        └── PasswordFieldWithToggle.java  # Reusable password visibility control
 ```
 
 ---
@@ -85,3 +86,8 @@ The application automatically seeds `data/users.txt` on first launch with three 
    - Generates an official, itemized receipt summarizing completed shifts, total hours, and payouts.
    - Backs up a `.txt` receipt in the `paystubs/` directory.
    - Uses Java standard `JTextArea.print()` to allow instant printing or **"Save to PDF"** via the native operating system print dialog without third-party PDF libraries!
+
+5. **Account Self-Service & Administration:**
+   - Employees can review their account details and change their password.
+   - Admins can update employee names, usernames, roles, and passwords.
+   - Password fields include a visibility toggle, including on the login screen.

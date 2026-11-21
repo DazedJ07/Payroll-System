@@ -5,9 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * PayrollCalculator - Dedicated mathematical calculation engine
- * Handles regular hours, overtime hours (1.5x multiplier), and gross pay.
- */
+PayrollCalculator - Dedicated mathematical calculation engine
+Handles regular hours, overtime hours (1.5x multiplier), and gross pay.
+*/
 public class PayrollCalculator {
 
     public static final double STANDARD_WORK_HOURS = 8.0;
@@ -15,11 +15,10 @@ public class PayrollCalculator {
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * Calculates the elapsed time in fractional hours between clock-in and clock-out.
-     *
-     * @param clockInStr  formatted string (yyyy-MM-dd HH:mm:ss)
-     * @param clockOutStr formatted string (yyyy-MM-dd HH:mm:ss)
-     * @return elapsed hours as double (e.g., 8.5)
+    Calculates the elapsed time in fractional hours between clock-in and clock-out.
+    @param clockInStr  formatted string (yyyy-MM-dd HH:mm:ss)
+    @param clockOutStr formatted string (yyyy-MM-dd HH:mm:ss)
+    @return elapsed hours as double (e.g., 8.5)
      */
     public static double calculateTotalHours(String clockInStr, String clockOutStr) {
         if (clockInStr == null || clockOutStr == null || 
@@ -44,10 +43,9 @@ public class PayrollCalculator {
     }
 
     /**
-     * Regular hours: Up to 8.0 hours per shift.
-     *
-     * @param totalHours total elapsed shift hours
-     * @return regular hours (0.0 to 8.0)
+    Regular hours: Up to 8.0 hours per shift.
+    @param totalHours total elapsed shift hours
+    @return regular hours (0.0 to 8.0)
      */
     public static double calculateRegularHours(double totalHours) {
         if (totalHours <= 0) {
@@ -57,10 +55,9 @@ public class PayrollCalculator {
     }
 
     /**
-     * Overtime hours: Any hours worked beyond 8.0 hours in a single shift.
-     *
-     * @param totalHours total elapsed shift hours
-     * @return overtime hours (totalHours - 8.0, or 0.0 if <= 8.0)
+     Overtime hours: Any hours worked beyond 8.0 hours in a single shift.
+     @param totalHours total elapsed shift hours
+     @return overtime hours (totalHours - 8.0, or 0.0 if <= 8.0)
      */
     public static double calculateOvertimeHours(double totalHours) {
         if (totalHours <= STANDARD_WORK_HOURS) {
@@ -70,13 +67,12 @@ public class PayrollCalculator {
     }
 
     /**
-     * Gross pay calculation: (regularHours * hourlyRate) + (overtimeHours * hourlyRate * 1.5).
-     *
-     * @param regularHours  regular hours worked (up to 8.0)
-     * @param overtimeHours overtime hours worked (beyond 8.0)
-     * @param hourlyRate    base employee hourly pay rate
-     * @return total gross pay
-     */
+     Gross pay calculation: (regularHours * hourlyRate) + (overtimeHours * hourlyRate * 1.5).
+     @param regularHours  regular hours worked (up to 8.0)
+     @param overtimeHours overtime hours worked (beyond 8.0)
+     @param hourlyRate    base employee hourly pay rate
+     @return total gross pay
+    */
     public static double calculateGrossPay(double regularHours, double overtimeHours, double hourlyRate) {
         double regularPay = regularHours * hourlyRate;
         double overtimePay = overtimeHours * (hourlyRate * OVERTIME_RATE_MULTIPLIER);
@@ -84,14 +80,14 @@ public class PayrollCalculator {
     }
 
     /**
-     * Formats currency cleanly with two decimal places.
+    Formats currency cleanly with two decimal places.
      */
     public static String formatCurrency(double amount) {
         return String.format("$%.2f", amount);
     }
 
     /**
-     * Formats hours cleanly with two decimal places.
+    Formats hours cleanly with two decimal places.
      */
     public static String formatHours(double hours) {
         return String.format("%.2f", hours);
