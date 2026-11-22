@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +27,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -38,10 +38,10 @@ import javax.swing.Timer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-/**
- * DashboardFrame - Main user interface accommodating Staff, Supervisor, and Admin views.
- * Features live time tracking, shift history, role-based controls, and one-click pay stub generation.
- */
+/*
+DashboardFrame - Main user interface accommodating Staff, Supervisor, and Admin views.
+Features live time tracking, shift history, role-based controls, and one-click pay stub generation.
+*/
 public class DashboardFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -51,6 +51,10 @@ public class DashboardFrame extends JFrame {
     // Header Components
     private JLabel lblLiveClock;
     private JLabel lblStatusBadge;
+    private JLabel lblUserTag;
+    private JLabel lblAccountName;
+    private JLabel lblAccountUsername;
+    private JLabel lblAccountRole;
 
     // Staff Timekeeping Panel Components
     private JButton btnClockIn;
@@ -87,9 +91,7 @@ public class DashboardFrame extends JFrame {
         refreshAllData();
     }
 
-    // ==========================================
     // UI INITIALIZATION
-    // ==========================================
     private void initComponents() {
         JPanel rootPanel = new JPanel(new BorderLayout(0, 10));
         rootPanel.setBackground(new Color(241, 245, 249));
@@ -98,19 +100,20 @@ public class DashboardFrame extends JFrame {
         // 1. Top Header Bar
         rootPanel.add(createHeaderPanel(), BorderLayout.NORTH);
 
-        // 2. Center Tabs (Role-Based)
+        // 2. Center Tabs
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 13));
 
-        // Personal Timekeeping Tab (Available to all roles)
+        // Personal Timekeeping Tab 
         tabbedPane.addTab("My Timekeeping", createPersonalTimekeepingPanel());
+        tabbedPane.addTab("Account Details", createAccountDetailsPanel());
 
-        // Supervisor View (Supervisor and Admin)
+        // Supervisor View 
         if ("Supervisor".equalsIgnoreCase(currentUser.getRole()) || "Admin".equalsIgnoreCase(currentUser.getRole())) {
             tabbedPane.addTab("Team Overview & Logs", createSupervisorPanel());
         }
 
-        // Admin View (Admin only)
+        // Admin View
         if ("Admin".equalsIgnoreCase(currentUser.getRole())) {
             tabbedPane.addTab("Employee & Payroll Admin", createAdminPanel());
         }
@@ -119,9 +122,9 @@ public class DashboardFrame extends JFrame {
         setContentPane(rootPanel);
     }
 
-    /**
-     * Creates top header banner showing user info, live clock, and logout button.
-     */
+    /*
+    Creates top header banner showing user info, live clock, and logout button.
+    */
     private JPanel createHeaderPanel() {
         JPanel panel = new JPanel(new BorderLayout(15, 10));
         panel.setBackground(new Color(30, 41, 59));
@@ -135,15 +138,14 @@ public class DashboardFrame extends JFrame {
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTitle.setForeground(Color.WHITE);
 
-        JLabel lblUserTag = new JLabel(" |  " + currentUser.getName() + " (" + currentUser.getEmployeeId() + ") - "
-                + currentUser.getRole() + "  |  Rate: " + PayrollCalculator.formatCurrency(currentUser.getHourlyRate()) + "/hr");
+        lblUserTag = new JLabel(userTagText());
         lblUserTag.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblUserTag.setForeground(new Color(203, 213, 225));
 
         leftPanel.add(lblTitle);
         leftPanel.add(lblUserTag);
 
-        // Right info (Live Clock, Status Badge, Logout)
+        //(Live Clock, Status Badge, Logout)
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         rightPanel.setOpaque(false);
 
@@ -186,9 +188,7 @@ public class DashboardFrame extends JFrame {
         return panel;
     }
 
-    // ==========================================
     // 1. STAFF VIEW: PERSONAL TIMEKEEPING
-    // ==========================================
     private JPanel createPersonalTimekeepingPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(Color.WHITE);
@@ -286,9 +286,7 @@ public class DashboardFrame extends JFrame {
         return panel;
     }
 
-    // ==========================================
     // 2. SUPERVISOR VIEW: TEAM OVERVIEW
-    // ==========================================
     private JPanel createSupervisorPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(Color.WHITE);
@@ -370,9 +368,7 @@ public class DashboardFrame extends JFrame {
         return panel;
     }
 
-    // ==========================================
     // 3. ADMIN VIEW: EMPLOYEE & PAYROLL ADMIN
-    // ==========================================
     private JPanel createAdminPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(Color.WHITE);
@@ -421,6 +417,26 @@ public class DashboardFrame extends JFrame {
             }
         });
 
+        JButton btnEditCredentials = new JButton("Edit Credentials");
+        btnEditCredentials.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnEditCredentials.setPreferredSize(new Dimension(150, 34));
+        btnEditCredentials.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editEmployeeCredentials();
+            }
+        });
+
+        JButton btnUpdateEmployeePassword = new JButton("Update Password");
+        btnUpdateEmployeePassword.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnUpdateEmployeePassword.setPreferredSize(new Dimension(160, 34));
+        btnUpdateEmployeePassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateEmployeePassword();
+            }
+        });
+
         JButton btnRefreshEmp = new JButton("Refresh");
         btnRefreshEmp.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btnRefreshEmp.setPreferredSize(new Dimension(90, 34));
@@ -436,7 +452,16 @@ public class DashboardFrame extends JFrame {
         toolbar.add(btnAdminGeneratePayStub);
         toolbar.add(btnRefreshEmp);
 
-        panel.add(toolbar, BorderLayout.NORTH);
+        JPanel accountToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        accountToolbar.setOpaque(false);
+        accountToolbar.add(btnEditCredentials);
+        accountToolbar.add(btnUpdateEmployeePassword);
+
+        JPanel toolbarRows = new JPanel(new GridLayout(2, 1, 0, 2));
+        toolbarRows.setOpaque(false);
+        toolbarRows.add(toolbar);
+        toolbarRows.add(accountToolbar);
+        panel.add(toolbarRows, BorderLayout.NORTH);
 
         // Employee Table
         String[] empColumns = {"Employee ID", "Full Name", "Username", "Role", "Hourly Rate ($/hr)"};
@@ -459,7 +484,7 @@ public class DashboardFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(tblEmployees);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        JLabel lblNotice = new JLabel("Admin Controls: Add staff accounts, update compensation rates, and generate official printable pay stubs.");
+        JLabel lblNotice = new JLabel("Select an employee to edit account credentials or update their password.");
         lblNotice.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblNotice.setForeground(new Color(100, 116, 139));
         lblNotice.setBorder(BorderFactory.createEmptyBorder(6, 4, 4, 4));
@@ -468,9 +493,95 @@ public class DashboardFrame extends JFrame {
         return panel;
     }
 
-    // ==========================================
+    private JPanel createAccountDetailsPanel() {
+        JPanel panel = new JPanel(new BorderLayout(12, 12));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(22, 28, 22, 28));
+
+        JLabel title = new JLabel("Account Details");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setForeground(new Color(30, 41, 59));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel content = new JPanel(new BorderLayout(0, 20));
+        content.setOpaque(false);
+
+        JPanel details = new JPanel(new GridLayout(0, 2, 12, 10));
+        details.setOpaque(false);
+        details.setBorder(BorderFactory.createTitledBorder("Your Profile"));
+        lblAccountName = addAccountDetail(details, "Full name:", currentUser.getName());
+        addAccountDetail(details, "Employee ID:", currentUser.getEmployeeId());
+        lblAccountUsername = addAccountDetail(details, "Username:", currentUser.getUsername());
+        lblAccountRole = addAccountDetail(details, "Role:", currentUser.getRole());
+        content.add(details, BorderLayout.NORTH);
+
+        JPanel passwordForm = new JPanel(new GridBagLayout());
+        passwordForm.setOpaque(false);
+        passwordForm.setBorder(BorderFactory.createTitledBorder("Change Password"));
+
+        PasswordFieldWithToggle currentPassword = new PasswordFieldWithToggle(18);
+        PasswordFieldWithToggle newPassword = new PasswordFieldWithToggle(18);
+        PasswordFieldWithToggle confirmPassword = new PasswordFieldWithToggle(18);
+        setPasswordFieldSize(currentPassword);
+        setPasswordFieldSize(newPassword);
+        setPasswordFieldSize(confirmPassword);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(7, 8, 7, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.3;
+        gbc.gridx = 0; gbc.gridy = 0;
+        passwordForm.add(new JLabel("Current password:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.7;
+        passwordForm.add(currentPassword, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.3;
+        passwordForm.add(new JLabel("New password:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.7;
+        passwordForm.add(newPassword, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.3;
+        passwordForm.add(new JLabel("Confirm password:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.7;
+        passwordForm.add(confirmPassword, gbc);
+
+        JButton btnChangePassword = new JButton("Change Password");
+        btnChangePassword.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnChangePassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeOwnPassword(currentPassword, newPassword, confirmPassword);
+            }
+        });
+        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 0.7;
+        gbc.anchor = GridBagConstraints.EAST;
+        passwordForm.add(btnChangePassword, gbc);
+
+        content.add(passwordForm, BorderLayout.CENTER);
+        panel.add(content, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JLabel addAccountDetail(JPanel details, String label, String value) {
+        JLabel name = new JLabel(label);
+        name.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        details.add(name);
+        JLabel detail = new JLabel(value);
+        detail.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        details.add(detail);
+        return detail;
+    }
+
+    private void setPasswordFieldSize(PasswordFieldWithToggle input) {
+        input.getPasswordField().setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        input.getPasswordField().setPreferredSize(new Dimension(220, 32));
+    }
+
+    private String userTagText() {
+        return " |  " + currentUser.getName() + " (" + currentUser.getEmployeeId() + ") - "
+                + currentUser.getRole() + "  |  Rate: "
+                + PayrollCalculator.formatCurrency(currentUser.getHourlyRate()) + "/hr";
+    }
+
     // LIVE CLOCK & DATA REFRESH ENGINE
-    // ==========================================
     private void startLiveClock() {
         Timer timer = new Timer(1000, new ActionListener() {
             @Override
@@ -482,9 +593,9 @@ public class DashboardFrame extends JFrame {
         timer.start();
     }
 
-    /**
-     * Refreshes all tables and status badges from local data files.
-     */
+    /*
+    Refreshes all tables and status badges from local data files.
+    */
     private void refreshAllData() {
         List<FileHelper.TimeLog> allLogs = FileHelper.loadLogsFromFile();
         List<FileHelper.User> allUsers = FileHelper.loadUsersFromFile();
@@ -572,14 +683,12 @@ public class DashboardFrame extends JFrame {
         }
     }
 
-    // ==========================================
     // USER-DEFINED METHODS: CLOCK IN & CLOCK OUT
-    // ==========================================
 
-    /**
-     * User-defined method: Clocks in the current user.
-     * Prevents double clock-in if an active shift is already pending.
-     */
+    /*
+    User-defined method: Clocks in the current user.
+    Prevents double clock-in if an active shift is already pending.
+    */
     public void clockIn() {
         List<FileHelper.TimeLog> logs = FileHelper.loadLogsFromFile();
 
@@ -619,10 +728,10 @@ public class DashboardFrame extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * User-defined method: Clocks out the current user, calculates regular hours,
-     * overtime hours, and total gross pay, and updates timelogs.txt.
-     */
+    /*
+    User-defined method: Clocks out the current user, calculates regular hours,
+    overtime hours, and total gross pay, and updates timelogs.txt.
+    */
     public void clockOut() {
         List<FileHelper.TimeLog> logs = FileHelper.loadLogsFromFile();
         FileHelper.TimeLog activeLog = null;
@@ -680,13 +789,11 @@ public class DashboardFrame extends JFrame {
         JOptionPane.showMessageDialog(this, message, "Shift Summary", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // ==========================================
     // SUPERVISOR LOGIC: RESOLVE MISSED PUNCHES
-    // ==========================================
 
-    /**
-     * Resolves a missed clock-out for a pending shift or allows editing.
-     */
+    /*
+    Resolves a missed clock-out for a pending shift or allows editing.
+    */
     private void resolveMissedClockOut() {
         List<FileHelper.TimeLog> logs = FileHelper.loadLogsFromFile();
         List<FileHelper.User> users = FileHelper.loadUsersFromFile();
@@ -821,9 +928,9 @@ public class DashboardFrame extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Allows supervisor/admin to add a completely manual shift entry.
-     */
+    /*
+    Allows supervisor/admin to add a completely manual shift entry.
+    */
     private void addManualShiftEntry() {
         List<FileHelper.User> users = FileHelper.loadUsersFromFile();
         if (users.isEmpty()) {
@@ -935,18 +1042,245 @@ public class DashboardFrame extends JFrame {
         }
     }
 
-    // ==========================================
     // ADMIN ACTIONS: ADD EMPLOYEES & ADJUST RATES
-    // ==========================================
 
-    /**
-     * Adds a new employee and saves to users.txt.
-     */
+    private FileHelper.User selectEmployeeForAccountAction(String prompt, List<FileHelper.User> users) {
+        if (users.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No employees found.", "Error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        int selectedRow = tblEmployees.getSelectedRow();
+        if (selectedRow >= 0) {
+            String employeeId = (String) modelEmployees.getValueAt(selectedRow, 0);
+            for (FileHelper.User user : users) {
+                if (user.getEmployeeId().equalsIgnoreCase(employeeId)) {
+                    return user;
+                }
+            }
+        }
+
+        String[] options = new String[users.size()];
+        for (int i = 0; i < users.size(); i++) {
+            FileHelper.User user = users.get(i);
+            options[i] = user.getEmployeeId() + " - " + user.getName() + " (" + user.getRole() + ")";
+        }
+
+        String selected = (String) JOptionPane.showInputDialog(
+                this, prompt, "Select Employee", JOptionPane.QUESTION_MESSAGE,
+                null, options, options[0]);
+        if (selected == null) {
+            return null;
+        }
+
+        for (int i = 0; i < options.length; i++) {
+            if (options[i].equals(selected)) {
+                return users.get(i);
+            }
+        }
+        return null;
+    }
+
+    private boolean isValidCsvField(String value) {
+        return value != null && !value.trim().isEmpty()
+                && value.indexOf(',') < 0 && value.indexOf('\n') < 0 && value.indexOf('\r') < 0;
+    }
+
+    private void editEmployeeCredentials() {
+        List<FileHelper.User> users = FileHelper.loadUsersFromFile();
+        final FileHelper.User targetUser = selectEmployeeForAccountAction(
+                "Select the employee whose credentials you want to edit:", users);
+        if (targetUser == null) {
+            return;
+        }
+
+        JTextField txtName = new JTextField(targetUser.getName(), 18);
+        JTextField txtUsername = new JTextField(targetUser.getUsername(), 18);
+        JComboBox<String> cmbRole = new JComboBox<String>(new String[]{"Staff", "Supervisor", "Admin"});
+        cmbRole.setSelectedItem(targetUser.getRole());
+
+        JPanel form = new JPanel(new GridLayout(3, 2, 8, 8));
+        form.add(new JLabel("Full name:"));
+        form.add(txtName);
+        form.add(new JLabel("Username:"));
+        form.add(txtUsername);
+        form.add(new JLabel("Role:"));
+        form.add(cmbRole);
+
+        int result = JOptionPane.showConfirmDialog(
+                this, form, "Edit Employee Credentials",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String name = txtName.getText().trim();
+        String username = txtUsername.getText().trim();
+        String role = (String) cmbRole.getSelectedItem();
+        if (!isValidCsvField(name) || !isValidCsvField(username)) {
+            JOptionPane.showMessageDialog(this,
+                    "Full name and username are required and cannot contain commas or line breaks.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        for (FileHelper.User user : users) {
+            if (!user.getEmployeeId().equalsIgnoreCase(targetUser.getEmployeeId())
+                    && user.getUsername().equalsIgnoreCase(username)) {
+                JOptionPane.showMessageDialog(this, "Username already exists!",
+                        "Duplicate Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        String oldRole = targetUser.getRole();
+        targetUser.setName(name);
+        targetUser.setUsername(username);
+        targetUser.setRole(role);
+        if (!FileHelper.saveUsersToFile(users)) {
+            JOptionPane.showMessageDialog(this, "Could not save the updated employee credentials.",
+                    "Save Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        boolean editingCurrentAccount = targetUser.getEmployeeId().equalsIgnoreCase(currentUser.getEmployeeId());
+        if (editingCurrentAccount) {
+            currentUser.setName(name);
+            currentUser.setUsername(username);
+            currentUser.setRole(role);
+            lblUserTag.setText(userTagText());
+            lblAccountName.setText(name);
+            lblAccountUsername.setText(username);
+            lblAccountRole.setText(role);
+        }
+        refreshAllData();
+
+        if (editingCurrentAccount && !oldRole.equalsIgnoreCase(role)) {
+            JOptionPane.showMessageDialog(this,
+                    "Your role was updated. Please log in again for the new permissions to take effect.",
+                    "Credentials Updated", JOptionPane.INFORMATION_MESSAGE);
+            new LoginFrame().setVisible(true);
+            dispose();
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Credentials for " + name + " were updated.",
+                "Credentials Updated", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void updateEmployeePassword() {
+        List<FileHelper.User> users = FileHelper.loadUsersFromFile();
+        final FileHelper.User targetUser = selectEmployeeForAccountAction(
+                "Select the employee whose password you want to update:", users);
+        if (targetUser == null) {
+            return;
+        }
+
+        PasswordFieldWithToggle newPassword = new PasswordFieldWithToggle(18);
+        PasswordFieldWithToggle confirmPassword = new PasswordFieldWithToggle(18);
+        JPanel form = new JPanel(new GridLayout(2, 2, 8, 8));
+        form.add(new JLabel("New password:"));
+        form.add(newPassword);
+        form.add(new JLabel("Confirm password:"));
+        form.add(confirmPassword);
+
+        int result = JOptionPane.showConfirmDialog(
+                this, form, "Update Employee Password",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String password = new String(newPassword.getPassword());
+        String confirmation = new String(confirmPassword.getPassword());
+        if (!isValidCsvField(password)) {
+            JOptionPane.showMessageDialog(this,
+                    "Password is required and cannot contain commas or line breaks.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (!password.equals(confirmation)) {
+            JOptionPane.showMessageDialog(this, "The passwords do not match.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        targetUser.setPassword(password);
+        if (!FileHelper.saveUsersToFile(users)) {
+            JOptionPane.showMessageDialog(this, "Could not save the updated password.",
+                    "Save Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (targetUser.getEmployeeId().equalsIgnoreCase(currentUser.getEmployeeId())) {
+            currentUser.setPassword(password);
+        }
+        JOptionPane.showMessageDialog(this,
+                "Password for " + targetUser.getName() + " was updated.",
+                "Password Updated", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void changeOwnPassword(PasswordFieldWithToggle currentPassword,
+                                   PasswordFieldWithToggle newPassword,
+                                   PasswordFieldWithToggle confirmPassword) {
+        String oldValue = new String(currentPassword.getPassword());
+        String newValue = new String(newPassword.getPassword());
+        String confirmation = new String(confirmPassword.getPassword());
+
+        if (oldValue.isEmpty() || newValue.isEmpty() || confirmation.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Complete all password fields.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (!isValidCsvField(newValue)) {
+            JOptionPane.showMessageDialog(this,
+                    "Password cannot contain commas or line breaks.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (!newValue.equals(confirmation)) {
+            JOptionPane.showMessageDialog(this, "The new passwords do not match.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        List<FileHelper.User> users = FileHelper.loadUsersFromFile();
+        FileHelper.User account = null;
+        for (FileHelper.User user : users) {
+            if (user.getEmployeeId().equalsIgnoreCase(currentUser.getEmployeeId())) {
+                account = user;
+                break;
+            }
+        }
+        if (account == null || !account.getPassword().equals(oldValue)) {
+            JOptionPane.showMessageDialog(this, "The current password is incorrect.",
+                    "Password Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        account.setPassword(newValue);
+        if (!FileHelper.saveUsersToFile(users)) {
+            JOptionPane.showMessageDialog(this, "Could not save the new password.",
+                    "Save Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        currentUser.setPassword(newValue);
+        currentPassword.getPasswordField().setText("");
+        newPassword.getPasswordField().setText("");
+        confirmPassword.getPasswordField().setText("");
+        JOptionPane.showMessageDialog(this, "Your password was updated.",
+                "Password Updated", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /*
+    Adds a new employee and saves to users.txt.
+    */
     private void addNewEmployee() {
         JTextField txtId = new JTextField(15);
         JTextField txtName = new JTextField(15);
         JTextField txtUsername = new JTextField(15);
-        JPasswordField txtPass = new JPasswordField(15);
+        PasswordFieldWithToggle txtPass = new PasswordFieldWithToggle(15);
         JComboBox<String> cmbRole = new JComboBox<String>(new String[]{"Staff", "Supervisor", "Admin"});
         JTextField txtRate = new JTextField("200.00", 15);
 
@@ -969,7 +1303,7 @@ public class DashboardFrame extends JFrame {
         gbc.gridx = 1; gbc.gridy = 2; form.add(txtUsername, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3; form.add(new JLabel("Password:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; form.add(txtPass, gbc);
+        gbc.gridx = 1; gbc.gridy = 3;         form.add(txtPass, gbc);
 
         gbc.gridx = 0; gbc.gridy = 4; form.add(new JLabel("Role:"), gbc);
         gbc.gridx = 1; gbc.gridy = 4; form.add(cmbRole, gbc);
@@ -983,12 +1317,15 @@ public class DashboardFrame extends JFrame {
         String empId = txtId.getText().trim();
         String name = txtName.getText().trim();
         String username = txtUsername.getText().trim();
-        String pass = new String(txtPass.getPassword()).trim();
+        String pass = new String(txtPass.getPassword());
         String role = (String) cmbRole.getSelectedItem();
         String rateStr = txtRate.getText().trim();
 
-        if (empId.isEmpty() || name.isEmpty() || username.isEmpty() || pass.isEmpty() || rateStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields are required!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+        if (!isValidCsvField(empId) || !isValidCsvField(name) || !isValidCsvField(username)
+                || !isValidCsvField(pass) || rateStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "All fields are required. Values cannot contain commas or line breaks.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -1023,9 +1360,9 @@ public class DashboardFrame extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Adjusts the hourly rate of an employee.
-     */
+    /*
+    Adjusts the hourly rate of an employee.
+    */
     private void adjustHourlyRate() {
         List<FileHelper.User> users = FileHelper.loadUsersFromFile();
         if (users.isEmpty()) {
@@ -1089,7 +1426,11 @@ public class DashboardFrame extends JFrame {
             if (newRate <= 0) throw new NumberFormatException();
 
             targetUser.setHourlyRate(newRate);
-            FileHelper.saveUsersToFile(users);
+            if (!FileHelper.saveUsersToFile(users)) {
+                JOptionPane.showMessageDialog(this, "Could not save the updated hourly rate.",
+                        "Save Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             refreshAllData();
 
             JOptionPane.showMessageDialog(this,
@@ -1147,16 +1488,13 @@ public class DashboardFrame extends JFrame {
         }
     }
 
-    // ==========================================
     // 4. ONE-CLICK PAY STUB GENERATION & PRINT/PDF
-    // ==========================================
 
     /**
-     * User-defined method: Generates a cleanly formatted pay stub, displays it
-     * in a preview dialog with Print/PDF capabilities, and saves a .txt backup in paystubs/.
-     *
-     * @param targetEmpId Employee ID whose pay stub is generated
-     */
+    User-defined method: Generates a cleanly formatted pay stub, displays it
+    in a preview dialog with Print/PDF capabilities, and saves a .txt backup in paystubs/.
+    @param targetEmpId Employee ID whose pay stub is generated
+    */
     public void exportPayStub(String targetEmpId) {
         List<FileHelper.User> users = FileHelper.loadUsersFromFile();
         FileHelper.User emp = null;
@@ -1251,9 +1589,9 @@ public class DashboardFrame extends JFrame {
         showPayStubDialog(emp, payStubText, savedFilePath);
     }
 
-    /**
-     * Displays pay stub dialog with built-in printing (PDF export) and receipt backup notification.
-     */
+    /*
+    Displays pay stub dialog with built-in printing (PDF export) and receipt backup notification.
+    */
     private void showPayStubDialog(final FileHelper.User emp, final String payStubText, final String savedFilePath) {
         final JDialog dialog = new JDialog(this, "Official Pay Stub - " + emp.getName(), true);
         dialog.setSize(760, 560);

@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * FileHelper - Handles file persistence for users, time logs, and pay stubs.
- * Strictly implements java.io.FileReader (wrapped in BufferedReader) and
- * java.io.FileWriter (wrapped in BufferedWriter).
- */
+/*
+FileHelper - Handles file persistence for users, time logs, and pay stubs.
+Strictly implements java.io.FileReader (wrapped in BufferedReader) and
+java.io.FileWriter (wrapped in BufferedWriter).
+*/
 public class FileHelper {
 
     public static final String DATA_DIR = "data";
@@ -23,9 +23,7 @@ public class FileHelper {
     public static final String TIMELOGS_FILE = "data" + File.separator + "timelogs.txt";
     public static final String PAYSTUBS_DIR = "paystubs";
 
-    // ==========================================
     // NESTED MODEL: User
-    // ==========================================
     public static class User {
         private String employeeId;
         private String name;
@@ -71,10 +69,7 @@ public class FileHelper {
             return String.format("%s - %s (%s)", employeeId, name, role);
         }
     }
-
-    // ==========================================
     // NESTED MODEL: TimeLog
-    // ==========================================
     public static class TimeLog {
         private String employeeId;
         private String name;
@@ -132,13 +127,11 @@ public class FileHelper {
         }
     }
 
-    // ==========================================
     // INITIALIZATION & DIRECTORY SETUP
-    // ==========================================
 
-    /**
-     * Ensures data/ and paystubs/ folders exist and seeds users.txt and timelogs.txt.
-     */
+    /*
+    Ensures data/ and paystubs/ folders exist and seeds users.txt and timelogs.txt.
+    */
     public static void initializeDataDirectoryAndFiles() {
         File dataDir = new File(DATA_DIR);
         if (!dataDir.exists()) {
@@ -165,9 +158,9 @@ public class FileHelper {
         }
     }
 
-    /**
-     * Seeds default users required by specifications.
-     */
+    /*
+    Seeds default users required by specifications.
+    */
     private static void seedDefaultUsers(File usersFile) {
         BufferedWriter writer = null;
         try {
@@ -190,13 +183,11 @@ public class FileHelper {
         }
     }
 
-    // ==========================================
     // USER PERSISTENCE (FileReader & FileWriter)
-    // ==========================================
 
-    /**
-     * Loads all users from data/users.txt using java.io.FileReader wrapped in BufferedReader.
-     */
+    /*
+    Loads all users from data/users.txt using java.io.FileReader wrapped in BufferedReader.
+    */
     public static List<User> loadUsersFromFile() {
         List<User> list = new ArrayList<User>();
         File file = new File(USERS_FILE);
@@ -219,7 +210,7 @@ public class FileHelper {
                     String empId = parts[0].trim();
                     String name = parts[1].trim();
                     String username = parts[2].trim();
-                    String password = parts[3].trim();
+                    String password = parts[3];
                     String role = parts[4].trim();
                     double rate = Double.parseDouble(parts[5].trim());
                     list.add(new User(empId, name, username, password, role, rate));
@@ -237,31 +228,25 @@ public class FileHelper {
         return list;
     }
 
-    /**
-     * Saves the entire list of users to data/users.txt using java.io.FileWriter.
-     */
-    public static void saveUsersToFile(List<User> users) {
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(new File(USERS_FILE), false));
+    /*
+    Saves the entire list of users to data/users.txt using java.io.FileWriter.
+    */
+    public static boolean saveUsersToFile(List<User> users) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(USERS_FILE), false))) {
             for (User u : users) {
                 writer.write(u.toCsvLine());
                 writer.newLine();
             }
+            return true;
         } catch (IOException e) {
             System.err.println("Error saving users to file: " + e.getMessage());
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException ignored) {}
-            }
+            return false;
         }
     }
 
-    /**
-     * Appends a single new user to data/users.txt.
-     */
+    /*
+    Appends a single new user to data/users.txt.
+    */
     public static void appendUser(User user) {
         BufferedWriter writer = null;
         try {
@@ -279,13 +264,11 @@ public class FileHelper {
         }
     }
 
-    // ==========================================
     // TIME LOG PERSISTENCE (FileReader & FileWriter)
-    // ==========================================
 
-    /**
-     * Loads all time logs from data/timelogs.txt using java.io.FileReader wrapped in BufferedReader.
-     */
+    /*
+    Loads all time logs from data/timelogs.txt using java.io.FileReader wrapped in BufferedReader.
+    */
     public static List<TimeLog> loadLogsFromFile() {
         List<TimeLog> logs = new ArrayList<TimeLog>();
         File file = new File(TIMELOGS_FILE);
@@ -330,9 +313,9 @@ public class FileHelper {
         return logs;
     }
 
-    /**
-     * Saves all time logs back to data/timelogs.txt.
-     */
+    /*
+    Saves all time logs back to data/timelogs.txt.
+    */
     public static void saveLogsToFile(List<TimeLog> logs) {
         BufferedWriter writer = null;
         try {
@@ -352,9 +335,9 @@ public class FileHelper {
         }
     }
 
-    /**
-     * Appends a new TimeLog record to data/timelogs.txt.
-     */
+    /*
+    Appends a new TimeLog record to data/timelogs.txt.
+    */
     public static void appendLogToFile(TimeLog log) {
         BufferedWriter writer = null;
         try {
@@ -372,17 +355,14 @@ public class FileHelper {
         }
     }
 
-    // ==========================================
     // PAY STUB EXPORT (FileWriter)
-    // ==========================================
 
     /**
-     * Exports a pay stub text receipt backup into paystubs/ folder.
-     *
-     * @param employeeId   ID of the employee
-     * @param payStubText  formatted receipt content
-     * @return Path string of the saved file
-     */
+    Exports a pay stub text receipt backup into paystubs/ folder.
+    @param employeeId   ID of the employee
+    @param payStubText  formatted receipt content
+    @return Path string of the saved file
+    */
     public static String exportPayStub(String employeeId, String payStubText) {
         File dir = new File(PAYSTUBS_DIR);
         if (!dir.exists()) {
