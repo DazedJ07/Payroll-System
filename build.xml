@@ -6,15 +6,24 @@
     <property name="build.dir" location="build"/>
     <property name="classes.dir" location="${build.dir}/classes"/>
     <property name="dist.dir" location="dist"/>
-    <property name="main-class" value="payroll.Main"/>
+    <property name="lib.dir" location="lib"/>
+    <property name="main-class" value="com.payroll.app.Main"/>
+
+    <path id="classpath">
+        <pathelement location="${classes.dir}"/>
+        <fileset dir="${lib.dir}" erroronmissingdir="false">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
 
     <target name="init">
         <mkdir dir="${classes.dir}"/>
         <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${lib.dir}"/>
     </target>
 
     <target name="compile" depends="init" description="compile the source">
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false" debug="true"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false" debug="true"/>
     </target>
 
     <target name="jar" depends="compile" description="package as runnable JAR">
@@ -27,9 +36,7 @@
 
     <target name="run" depends="compile" description="run the application">
         <java classname="${main-class}" fork="true">
-            <classpath>
-                <pathelement path="${classes.dir}"/>
-            </classpath>
+            <classpath refid="classpath"/>
         </java>
     </target>
 

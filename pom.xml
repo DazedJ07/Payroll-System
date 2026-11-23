@@ -6,7 +6,7 @@
 
     <groupId>com.company.payroll</groupId>
     <artifactId>StaffPayrollSystem</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0</version>
     <packaging>jar</packaging>
 
     <name>Staff Timekeeping and Payroll Desktop Application</name>
@@ -17,10 +17,18 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
+    <dependencies>
+        <!-- FlatLaf Modern Flat Look and Feel -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.5.4</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <sourceDirectory>src</sourceDirectory>
         <plugins>
-            <!-- Maven Compiler Plugin configured for Java 8+ compatibility -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -30,16 +38,14 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <!-- Exec Plugin to run Main directly from Maven/NetBeans -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>payroll.Main</mainClass>
+                    <mainClass>com.payroll.app.Main</mainClass>
                 </configuration>
             </plugin>
-            <!-- JAR Plugin with Main-Class in manifest -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -47,7 +53,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>payroll.Main</mainClass>
+                            <mainClass>com.payroll.app.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

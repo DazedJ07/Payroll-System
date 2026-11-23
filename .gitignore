@@ -2,7 +2,9 @@
 bin/
 build/
 dist/
+target/
 .tools/
+*.class
 
 # IDE files
 nbproject/private/

@@ -1,27 +1,42 @@
 # Staff Timekeeping and Payroll Desktop Application
 
-A clean, modular, beginner-friendly **Java Swing** desktop application for Staff Timekeeping and Payroll calculation. Runs out-of-the-box in **Apache NetBeans IDE** (standard Java SE Ant or Maven project) on macOS and Windows with zero external database or internet dependencies.
+A modern, clean, modular **Java Swing** desktop application for Staff Timekeeping and Payroll calculation. Runs out-of-the-box in **Apache NetBeans IDE** (standard Java SE Ant or Maven project) on Windows, macOS, and Linux with zero external database dependencies.
 
 ---
 
 ## 📁 Package & Class Architecture
 
 ```
-Payroll/
-├── pom.xml                               # Maven project configuration (Java 8+)
-├── build.xml                             # Ant build configuration
-├── data/                                 # Persistent CSV data directory (auto-created)
-│   ├── users.txt                         # Seeded employee accounts & hourly rates
-│   └── timelogs.txt                      # Shift clock records & calculated pay
-├── paystubs/                             # Pay stub backup text receipts (auto-created)
+Payroll-System/
+├── pom.xml                                   # Maven configuration (Java 8+, FlatLaf 3.5.4)
+├── build.xml                                 # NetBeans Ant build configuration
+├── lib/                                      # Included libraries (flatlaf-3.5.4.jar)
+├── data/                                     # Persistent CSV data directory (auto-created)
+│   ├── users.txt                             # Seeded employee accounts & hourly rates
+│   └── timelogs.txt                          # Shift clock records & calculated pay
+├── paystubs/                                 # Pay stub backup text receipts (auto-created)
 └── src/
-    └── payroll/                          # Main application package
-        ├── Main.java                     # Application entry point & L&F setup
-        ├── LoginFrame.java               # Authentication window & role-based routing
-        ├── DashboardFrame.java           # Staff, Supervisor & Admin tabbed views
-        ├── FileHelper.java               # FileReader / FileWriter persistence engine
-        ├── PayrollCalculator.java        # Dedicated mathematical calculation engine
-        └── PasswordFieldWithToggle.java  # Reusable password visibility control
+    └── com/
+        └── payroll/
+            ├── app/
+            │   └── Main.java                 # Entry point, FlatLaf theme boot, EDT launcher
+            ├── model/
+            │   ├── User.java                 # Model for employee credentials & role permissions
+            │   └── TimeLog.java              # Model for shift time punch & earnings
+            ├── dao/
+            │   └── FileDao.java              # FileReader/FileWriter persistence engine
+            ├── service/
+            │   └── PayrollService.java       # Math engine (OT 1.5x, Tax, Net Pay) & business rules
+            ├── util/
+            │   └── UIHelper.java             # Palette (#1E293B, #2563EB), fonts & Swing boilerplate reducers
+            └── ui/
+                ├── LoginFrame.java           # Modern centered login modal with visibility toggle
+                ├── DashboardFrame.java       # Main frame with navy header, live clock, status badge & tabs
+                ├── TimekeepingPanel.java     # Staff time tracking: Punch In/Out, history & pay stub
+                ├── SupervisorPanel.java      # Team oversight: Resolve missed punches & manual shifts
+                ├── AdminPanel.java           # Complete Employee CRUD, rate adjust & credential manager
+                ├── AccountPanel.java         # Profile overview & self-service password changer
+                └── PayStubDialog.java        # Printable pay slip preview with Save-as-PDF support
 ```
 
 ---
@@ -40,54 +55,43 @@ The application automatically seeds `data/users.txt` on first launch with three 
 
 ## 🚀 Running in Apache NetBeans IDE
 
-### Option A: Open as an Existing Project (Easiest)
+### Option A: Open as Maven Project (Recommended)
 1. Open **Apache NetBeans IDE**.
 2. Click **File** > **Open Project...**
-3. Browse to and select the `Payroll` directory (NetBeans detects `pom.xml` or `build.xml`).
-4. Right-click the project in the Projects window and select **Run** (or press <kbd>F6</kbd>).
+3. Browse to and select `Payroll-System` (NetBeans detects `pom.xml`).
+4. Press <kbd>F6</kbd> or click **Run Project**.
 
-### Option B: Create a New Standard Java Application (Ant)
-1. In NetBeans, click **File** > **New Project...**
-2. Choose **Java with Ant** > **Java Application**, click **Next**.
-3. Name the project `StaffPayrollSystem`.
-4. Ensure the package name is `payroll`.
-5. Copy the 5 `.java` files from `src/payroll/` into the `payroll` package inside your NetBeans project:
-   - `Main.java`
-   - `LoginFrame.java`
-   - `DashboardFrame.java`
-   - `FileHelper.java`
-   - `PayrollCalculator.java`
-6. Right-click `Main.java` and select **Run File** (or press <kbd>Shift</kbd> + <kbd>F6</kbd>).
+### Option B: Open as Ant Project
+1. Open **Apache NetBeans IDE**.
+2. Click **File** > **Open Project...** and select `Payroll-System` (NetBeans detects `build.xml`).
+3. If needed, verify `lib/flatlaf-3.5.4.jar` is in **Project Properties > Libraries**.
+4. Press <kbd>F6</kbd> to run.
 
 ---
 
 ## ⚙️ Core Technical Features
 
-1. **Explicit `java.io.FileReader` and `java.io.FileWriter`:**
-   - Reads lines using `BufferedReader(new FileReader(...))`
-   - Writes/Appends records using `BufferedWriter(new FileWriter(..., append))`
-   - No external SQL or ORM dependencies; all data is human-readable `.txt` in `data/`.
+1. **Clean Custom Architecture & Compact Code:**
+   - Modularized into `com.payroll.app`, `model`, `dao`, `service`, `ui`, and `util`.
+   - Every file is under 150–250 lines with zero dead code or NetBeans GUI-Builder coordinate bloat.
+   - Dedicated `UIHelper` factory reduces repetitive Swing setup to 1-line calls.
 
-2. **Dedicated User-Defined Methods:**
-   - `authenticateUser(username, password)` in [`LoginFrame.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/LoginFrame.java)
-   - `clockIn()` and `clockOut()` in [`DashboardFrame.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/DashboardFrame.java)
-   - `calculateRegularHours(totalHours)` in [`PayrollCalculator.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/PayrollCalculator.java)
-   - `calculateOvertimeHours(totalHours)` in [`PayrollCalculator.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/PayrollCalculator.java)
-   - `calculateGrossPay(regHours, otHours, rate)` in [`PayrollCalculator.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/PayrollCalculator.java)
-   - `loadLogsFromFile()`, `saveLogsToFile()`, `appendLogToFile()` in [`FileHelper.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/FileHelper.java)
-   - `exportPayStub(employeeId)` in [`DashboardFrame.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/DashboardFrame.java) & [`FileHelper.java`](file:///Users/honestomedina/Desktop/Payroll/src/payroll/FileHelper.java)
+2. **Persistence Engine (`java.io.FileReader` & `java.io.FileWriter`):**
+   - Uses `BufferedReader` wrapping `FileReader` and `BufferedWriter` wrapping `FileWriter`.
+   - Plain CSV persistence in `data/users.txt` and `data/timelogs.txt`.
 
-3. **Payroll Math Rules:**
+3. **Payroll Math & Statutory Deductions:**
    - **Regular Hours:** Up to `8.0` hours per shift.
-   - **Overtime Hours:** Elapsed hours beyond `8.0` in a single shift, paid at **`1.5x`** the base hourly rate.
-   - **Total Pay:** `(regularHours * hourlyRate) + (overtimeHours * hourlyRate * 1.5)`.
+   - **Overtime:** Elapsed hours beyond `8.0` in a single shift, paid at **`1.5x`** base rate.
+   - **Withholding Tax:** 10.0% deduction.
+   - **Benefits / Social Security:** 4.0% statutory deduction.
+   - **Net Take-Home Pay:** `Gross Pay - Total Deductions`.
 
 4. **One-Click Pay Stub Generation & PDF Print:**
-   - Generates an official, itemized receipt summarizing completed shifts, total hours, and payouts.
-   - Backs up a `.txt` receipt in the `paystubs/` directory.
-   - Uses Java standard `JTextArea.print()` to allow instant printing or **"Save to PDF"** via the native operating system print dialog without third-party PDF libraries!
+   - Itemized official receipt summarizing shift breakdown, gross earnings, statutory deductions, and net payout.
+   - Automatic `.txt` backup in `paystubs/`.
+   - Built-in **"Print / Save as PDF"** via `JTextArea.print()`.
 
-5. **Account Self-Service & Administration:**
-   - Employees can review their account details and change their password.
-   - Admins can update employee names, usernames, roles, and passwords.
-   - Password fields include a visibility toggle, including on the login screen.
+5. **Modern Look and Feel:**
+   - Powered by FlatLaf (FlatLightLaf) with soft light-gray cards, slate-navy headers, and royal blue accents.
+   - Password fields feature an interactive reveal/hide toggle (`◉`).
