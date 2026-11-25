@@ -20,7 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 /**
- * LoginFrame - Clean authentication window for Staff, Supervisor, and Admin users.
+ LoginFrame
  */
 public class LoginFrame extends JFrame {
     private final JTextField txtUsername;

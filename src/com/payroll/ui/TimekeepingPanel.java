@@ -19,7 +19,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * TimekeepingPanel - Personal shift tracking, punch in/out, and shift history for employees.
+ TimekeepingPanel
  */
 public class TimekeepingPanel extends JPanel {
     private final User user;

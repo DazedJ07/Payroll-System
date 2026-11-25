@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,12 +26,19 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * SupervisorPanel - Team shift log overview, missed punch resolution, and manual shift entry.
+ SupervisorPanel
  */
 public class SupervisorPanel extends JPanel {
     private final DashboardFrame parentDashboard;
     private final DefaultTableModel tableModel;
     private final JTable table;
+    private final JButton btnResolve;
+    private final JButton btnManual;
+    private final JButton btnArchive;
+    private final JButton btnDelete;
+    private final JButton btnRestore;
+    private final JButton btnToggleArchive;
+    private boolean archivedView;
 
     public SupervisorPanel(DashboardFrame parentDashboard) {
         this.parentDashboard = parentDashboard;
@@ -38,17 +46,32 @@ public class SupervisorPanel extends JPanel {
         setBackground(UIHelper.CARD_BG);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        toolbar.setOpaque(false);
+        JPanel toolbars = new JPanel(new GridLayout(2, 1, 0, 4));
+        toolbars.setOpaque(false);
 
-        JButton btnResolve = UIHelper.createButton("Resolve Missed Clock-Out", UIHelper.WARNING, Color.WHITE, e -> resolveMissedClockOut());
-        JButton btnManual = UIHelper.createButton("Add Manual Shift Entry", UIHelper.PURPLE, Color.WHITE, e -> addManualShift());
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 2));
+        row1.setOpaque(false);
+        btnResolve = UIHelper.createButton("Resolve Missed Clock-Out", UIHelper.WARNING, Color.WHITE, e -> resolveMissedClockOut());
+        btnManual = UIHelper.createButton("Add Manual Shift Entry", UIHelper.PURPLE, Color.WHITE, e -> addManualShift());
         JButton btnRefresh = UIHelper.createButton("Refresh Logs", new Color(148, 163, 184), Color.WHITE, e -> refreshData());
+        row1.add(btnResolve);
+        row1.add(btnManual);
+        row1.add(btnRefresh);
 
-        toolbar.add(btnResolve);
-        toolbar.add(btnManual);
-        toolbar.add(btnRefresh);
-        add(toolbar, BorderLayout.NORTH);
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 2));
+        row2.setOpaque(false);
+        btnArchive = UIHelper.createButton("Archive Selected Shift", UIHelper.WARNING, Color.WHITE, e -> archiveSelectedShift());
+        btnDelete = UIHelper.createButton("Delete Selected Shift", UIHelper.DANGER, Color.WHITE, e -> deleteSelectedShift());
+        btnRestore = UIHelper.createButton("Restore Selected Shift", UIHelper.SUCCESS, Color.WHITE, e -> restoreSelectedShift());
+        btnToggleArchive = UIHelper.createButton("View Archived", new Color(100, 116, 139), Color.WHITE, e -> toggleArchivedView());
+        row2.add(btnArchive);
+        row2.add(btnDelete);
+        row2.add(btnRestore);
+        row2.add(btnToggleArchive);
+
+        toolbars.add(row1);
+        toolbars.add(row2);
+        add(toolbars, BorderLayout.NORTH);
 
         String[] cols = {"Emp ID", "Employee Name", "Date", "Clock In Time", "Clock Out Time", "Reg Hrs", "OT Hrs", "Total Pay"};
         tableModel = new DefaultTableModel(cols, 0) {
@@ -62,16 +85,89 @@ public class SupervisorPanel extends JPanel {
         lblHint.setFont(UIHelper.FONT_SMALL);
         lblHint.setForeground(UIHelper.TEXT_MUTED);
         add(lblHint, BorderLayout.SOUTH);
+        updateActionAvailability();
     }
 
     public void refreshData() {
         tableModel.setRowCount(0);
-        for (TimeLog l : FileDao.loadLogs()) {
+        List<TimeLog> logs = archivedView ? FileDao.loadArchivedLogs() : FileDao.loadLogs();
+        for (TimeLog l : logs) {
             tableModel.addRow(new Object[]{
                     l.getEmployeeId(), l.getName(), l.getDate(), l.getClockInTime(), l.getClockOutTime(),
                     UIHelper.hours(l.getRegularHours()), UIHelper.hours(l.getOvertimeHours()),
                     UIHelper.currency(l.getTotalPay())
             });
+        }
+        updateActionAvailability();
+    }
+
+    private void updateActionAvailability() {
+        btnResolve.setEnabled(!archivedView);
+        btnManual.setEnabled(!archivedView);
+        btnArchive.setEnabled(!archivedView);
+        btnRestore.setEnabled(archivedView);
+        btnToggleArchive.setText(archivedView ? "View Active" : "View Archived");
+    }
+
+    private void toggleArchivedView() {
+        archivedView = !archivedView;
+        refreshData();
+    }
+
+    private TimeLog getSelectedLog() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            UIHelper.showWarning(this, "Select a shift row first.", "No Shift Selected");
+            return null;
+        }
+        String employeeId = (String) tableModel.getValueAt(row, 0);
+        String clockInTime = (String) tableModel.getValueAt(row, 3);
+        List<TimeLog> logs = archivedView ? FileDao.loadArchivedLogs() : FileDao.loadLogs();
+        for (TimeLog log : logs) {
+            if (log.getEmployeeId().equalsIgnoreCase(employeeId)
+                    && log.getClockInTime().equals(clockInTime)) return log;
+        }
+        UIHelper.showError(this, "The selected shift could not be found. Refresh the table and try again.",
+                "Shift Not Found");
+        return null;
+    }
+
+    private void archiveSelectedShift() {
+        TimeLog target = getSelectedLog();
+        if (target == null) return;
+        if (target.isPending()) {
+            UIHelper.showWarning(this, "A pending clock-in cannot be archived until it is resolved or deleted.",
+                    "Pending Shift");
+            return;
+        }
+        if (!UIHelper.confirm(this, "Archive the shift for " + target.getName() + " on " + target.getDate()
+                + "? It will be removed from active logs and payroll.", "Confirm Archive")) return;
+        boolean archived = FileDao.archiveLog(target.getEmployeeId(), target.getClockInTime());
+        parentDashboard.refreshAll();
+        if (!archived) {
+            UIHelper.showError(this, "Could not archive the selected shift.", "Archive Failed");
+        }
+    }
+
+    private void deleteSelectedShift() {
+        TimeLog target = getSelectedLog();
+        if (target == null) return;
+        if (!UIHelper.confirm(this, "Permanently delete the shift for " + target.getName() + " on "
+                + target.getDate() + "?", "Confirm Delete")) return;
+        boolean deleted = FileDao.deleteLog(target.getEmployeeId(), target.getClockInTime());
+        parentDashboard.refreshAll();
+        if (!deleted) {
+            UIHelper.showError(this, "Could not delete the selected shift.", "Delete Failed");
+        }
+    }
+
+    private void restoreSelectedShift() {
+        TimeLog target = getSelectedLog();
+        if (target == null) return;
+        boolean restored = FileDao.restoreLog(target.getEmployeeId(), target.getClockInTime());
+        parentDashboard.refreshAll();
+        if (!restored) {
+            UIHelper.showError(this, "Could not restore the selected shift.", "Restore Failed");
         }
     }
 

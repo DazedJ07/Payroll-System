@@ -1,4 +1,4 @@
-EMP001,Admin User,admin,admin123,Admin,500,00
-EMP002,Jane Supervisor,super,super123,Supervisor,350,00
-EMP003,John Staff,staff,staff123,Staff,200,00
-EMP004,jared,ja,jared321,Staff,200,00
+EMP001,Admin User,admin,admin123,Admin,500.00
+EMP002,Jane Supervisor,super,super123,Supervisor,350.00
+EMP003,John Staff,staff,staff123,Staff,200.00
+EMP004,jared,ja,jared321,Staff,200.00

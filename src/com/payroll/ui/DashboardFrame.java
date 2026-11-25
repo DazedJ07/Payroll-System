@@ -18,7 +18,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.Timer;
 
 /**
- * DashboardFrame - Modern application frame hosting role-based operational tabs.
+    DashboardFrame
  */
 public class DashboardFrame extends JFrame {
     private final User currentUser;

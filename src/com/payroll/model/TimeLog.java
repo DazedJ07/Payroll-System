@@ -1,5 +1,7 @@
 package com.payroll.model;
 
+import java.util.Locale;
+
 /**
  * TimeLog - Model representing an employee shift time punch and pay record.
  */
@@ -54,23 +56,37 @@ public class TimeLog {
     }
 
     public String toCsv() {
-        return String.format("%s,%s,%s,%s,%s,%.2f,%.2f,%.2f",
+        return String.format(Locale.US, "%s,%s,%s,%s,%s,%.2f,%.2f,%.2f",
                 employeeId, name, date, clockInTime, clockOutTime,
                 regularHours, overtimeHours, totalPay);
     }
 
     public static TimeLog fromCsv(String line) {
         if (line == null || line.trim().isEmpty() || line.startsWith("#")) return null;
-        String[] parts = line.split(",");
-        if (parts.length >= 8) {
-            try {
-                return new TimeLog(parts[0].trim(), parts[1].trim(), parts[2].trim(),
-                        parts[3].trim(), parts[4].trim(),
-                        Double.parseDouble(parts[5].trim()),
-                        Double.parseDouble(parts[6].trim()),
-                        Double.parseDouble(parts[7].trim()));
-            } catch (NumberFormatException ignored) {}
+        String[] parts = line.split(",", -1);
+        try {
+            double regularHours;
+            double overtimeHours;
+            double totalPay;
+            if (parts.length == 8) {
+                regularHours = Double.parseDouble(parts[5].trim());
+                overtimeHours = Double.parseDouble(parts[6].trim());
+                totalPay = Double.parseDouble(parts[7].trim());
+            } else if (parts.length == 11) {
+                regularHours = parseLegacyDecimal(parts[5], parts[6]);
+                overtimeHours = parseLegacyDecimal(parts[7], parts[8]);
+                totalPay = parseLegacyDecimal(parts[9], parts[10]);
+            } else {
+                return null;
+            }
+            return new TimeLog(parts[0].trim(), parts[1].trim(), parts[2].trim(),
+                    parts[3].trim(), parts[4].trim(), regularHours, overtimeHours, totalPay);
+        } catch (NumberFormatException ignored) {
         }
         return null;
+    }
+
+    private static double parseLegacyDecimal(String whole, String fraction) {
+        return Double.parseDouble(whole.trim() + "." + fraction.trim());
     }
 }

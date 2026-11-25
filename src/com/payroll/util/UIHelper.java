@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -22,10 +23,10 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * UIHelper - Central design system, modern styling constants, and Swing boilerplate reducers.
+ UIHelper 
  */
 public class UIHelper {
-    // MODERN COLOR PALETTE
+    
     public static final Color BG_LIGHT = new Color(245, 247, 250);       // Soft light gray #F5F7FA
     public static final Color CARD_BG = Color.WHITE;                      // Clean white card #FFFFFF
     public static final Color HEADER_DARK = new Color(30, 41, 59);       // Slate Navy #1E293B

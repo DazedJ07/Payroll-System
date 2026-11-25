@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * PayrollService - Core mathematical calculations and business logic operations.
+ * PayrollService
  */
 public class PayrollService {
     public static final double STANDARD_HOURS = 8.0;
@@ -78,6 +78,12 @@ public class PayrollService {
     public static boolean addUser(User newUser) {
         List<User> users = FileDao.loadUsers();
         for (User u : users) {
+            if (u.getEmployeeId().equalsIgnoreCase(newUser.getEmployeeId())
+                    || u.getUsername().equalsIgnoreCase(newUser.getUsername())) {
+                return false;
+            }
+        }
+        for (User u : FileDao.loadArchivedUsers()) {
             if (u.getEmployeeId().equalsIgnoreCase(newUser.getEmployeeId())
                     || u.getUsername().equalsIgnoreCase(newUser.getUsername())) {
                 return false;

@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 
 /**
- * AccountPanel - User profile details viewer and self-service password changer.
+    AccountPanel
  */
 public class AccountPanel extends JPanel {
     private final User user;

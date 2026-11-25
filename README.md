@@ -13,7 +13,9 @@ Payroll-System/
 ├── lib/                                      # Included libraries (flatlaf-3.5.4.jar)
 ├── data/                                     # Persistent CSV data directory (auto-created)
 │   ├── users.txt                             # Seeded employee accounts & hourly rates
-│   └── timelogs.txt                          # Shift clock records & calculated pay
+│   ├── timelogs.txt                          # Shift clock records & calculated pay
+│   ├── archived_users.txt                    # Archived employee accounts
+│   └── archived_timelogs.txt                 # Archived shift records
 ├── paystubs/                                 # Pay stub backup text receipts (auto-created)
 └── src/
     └── com/
@@ -24,7 +26,7 @@ Payroll-System/
             │   ├── User.java                 # Model for employee credentials & role permissions
             │   └── TimeLog.java              # Model for shift time punch & earnings
             ├── dao/
-            │   └── FileDao.java              # FileReader/FileWriter persistence engine
+            │   └── FileDao.java              # FileReader/FileWriter persistence and PDF export
             ├── service/
             │   └── PayrollService.java       # Math engine (OT 1.5x, Tax, Net Pay) & business rules
             ├── util/
@@ -36,7 +38,7 @@ Payroll-System/
                 ├── SupervisorPanel.java      # Team oversight: Resolve missed punches & manual shifts
                 ├── AdminPanel.java           # Complete Employee CRUD, rate adjust & credential manager
                 ├── AccountPanel.java         # Profile overview & self-service password changer
-                └── PayStubDialog.java        # Printable pay slip preview with Save-as-PDF support
+                └── PayStubDialog.java        # Pay slip preview and PDF generation/browser launch
 ```
 
 ---
@@ -64,8 +66,9 @@ The application automatically seeds `data/users.txt` on first launch with three 
 ### Option B: Open as Ant Project
 1. Open **Apache NetBeans IDE**.
 2. Click **File** > **Open Project...** and select `Payroll-System` (NetBeans detects `build.xml`).
-3. If needed, verify `lib/flatlaf-3.5.4.jar` is in **Project Properties > Libraries**.
-4. Press <kbd>F6</kbd> to run.
+3. Resolve the Maven dependencies once by opening/building the project as Maven; Ant reads OpenPDF from the local Maven repository.
+4. If needed, verify `lib/flatlaf-3.5.4.jar` is in **Project Properties > Libraries**.
+5. Press <kbd>F6</kbd> to run.
 
 ---
 
@@ -87,11 +90,18 @@ The application automatically seeds `data/users.txt` on first launch with three 
    - **Benefits / Social Security:** 4.0% statutory deduction.
    - **Net Take-Home Pay:** `Gross Pay - Total Deductions`.
 
-4. **One-Click Pay Stub Generation & PDF Print:**
+4. **Pay Stub PDF Export:**
    - Itemized official receipt summarizing shift breakdown, gross earnings, statutory deductions, and net payout.
    - Automatic `.txt` backup in `paystubs/`.
-   - Built-in **"Print / Save as PDF"** via `JTextArea.print()`.
+   - **Create PDF & Open in Browser** generates a `.pdf` in `paystubs/` and opens it in the computer's default web browser.
+   - PDF generation uses OpenPDF; Maven resolves this dependency automatically.
 
 5. **Modern Look and Feel:**
    - Powered by FlatLaf (FlatLightLaf) with soft light-gray cards, slate-navy headers, and royal blue accents.
    - Password fields feature an interactive reveal/hide toggle (`◉`).
+
+6. **Archive and Delete:**
+   - Admins can archive employee accounts or permanently delete them; an employee's shift history is retained.
+   - Admins and supervisors can archive, restore, or permanently delete shift records.
+   - Archived employee accounts are disabled and hidden from the active employee list. Archived shift records are hidden from active logs and payroll until restored.
+   - Successful changes refresh the dashboard's staff, admin, and supervisor views.

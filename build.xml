@@ -14,6 +14,7 @@
         <fileset dir="${lib.dir}" erroronmissingdir="false">
             <include name="*.jar"/>
         </fileset>
+        <pathelement location="${user.home}/.m2/repository/com/github/librepdf/openpdf/1.3.30/openpdf-1.3.30.jar"/>
     </path>
 
     <target name="init">

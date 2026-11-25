@@ -2,30 +2,29 @@
                        STAFF TIMEKEEPING & PAYROLL SYSTEM
                                OFFICIAL PAYSLIP
 ========================================================================================
-Generated On:       2026-11-22 10:42:58
-Employee ID:        EMP001
-Employee Name:      Admin User
-Role / Position:    Admin
-Base Hourly Rate:   $500.00 / hr
-Overtime Rate (1.5x): $750.00 / hr
+Generated On:       2026-11-25 01:30:50
+Employee ID:        EMP003
+Employee Name:      John Staff
+Role / Position:    Staff
+Base Hourly Rate:   $200,00 / hr
+Overtime Rate (1.5x): $300,00 / hr
 ----------------------------------------------------------------------------------------
 Date         Clock-In             Clock-Out            Reg Hrs    OT Hrs     Shift Total 
 ----------------------------------------------------------------------------------------
-2026-11-19   2026-11-19 02:14:36  2026-11-19 02:14:39  0.00       0.00       $0.42       
-2026-11-19   2026-11-19 02:40:12  2026-11-19 02:40:18  0.00       0.00       $0.83       
+2026-11-25   2026-11-25 01:29:06  2026-11-25 01:30:02  0,02       0,00       $3,11       
 ----------------------------------------------------------------------------------------
 EARNINGS SUMMARY:
-  Total Completed Shifts:   2
-  Regular Earnings:         0.00     hrs  @ $500.00/hr   =  $0.00
-  Overtime Earnings:        0.00     hrs  @ $750.00/hr   =  $0.00
-  GROSS PAY:                                                          $1.25
+  Total Completed Shifts:   1
+  Regular Earnings:         0,02     hrs  @ $200,00/hr   =  $4,00
+  Overtime Earnings:        0,00     hrs  @ $300,00/hr   =  $0,00
+  GROSS PAY:                                                          $3,11
 ----------------------------------------------------------------------------------------
 DEDUCTIONS BREAKDOWN:
-  Withholding Tax (10.0%):                                            -$0.13
-  Social Security & Benefits (4.0%):                                 -$0.05
-  TOTAL DEDUCTIONS:                                                  -$0.18
+  Withholding Tax (10.0%):                                            -$0,31
+  Social Security & Benefits (4.0%):                                 -$0,12
+  TOTAL DEDUCTIONS:                                                  -$0,44
 ========================================================================================
-  NET TAKE-HOME PAY:                                                  $1.08
+  NET TAKE-HOME PAY:                                                  $2,67
 ========================================================================================
                       Thank you for your dedicated service!
 ========================================================================================

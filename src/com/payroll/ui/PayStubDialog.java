@@ -1,12 +1,14 @@
 package com.payroll.ui;
 
 import com.payroll.util.UIHelper;
+import com.payroll.dao.FileDao;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.print.PrinterException;
-import java.text.MessageFormat;
+import java.io.File;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -16,7 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
- * PayStubDialog - Displays the formatted pay slip with built-in Print / Save to PDF capabilities.
+ PayStubDialog
  */
 public class PayStubDialog extends JDialog {
     public PayStubDialog(Frame parent, String employeeName, String employeeId, String payStubText, String filePath) {
@@ -46,20 +48,30 @@ public class PayStubDialog extends JDialog {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         buttons.setOpaque(false);
 
-        JButton btnPrint = UIHelper.createButton("Print / Save as PDF", UIHelper.PRIMARY, Color.WHITE, e -> {
+        JButton btnPdf = UIHelper.createButton("Create PDF & Open in Browser", UIHelper.PRIMARY, Color.WHITE, e -> {
+            String pdfPath = FileDao.savePayStubPdf(employeeId, payStubText);
+            if (pdfPath == null) {
+                UIHelper.showError(this, "Could not create the pay stub PDF. Check the paystubs folder and permissions.",
+                        "PDF Creation Failed");
+                return;
+            }
+            lblSaved.setText("PDF: " + pdfPath);
+
+            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                UIHelper.showError(this, "PDF created at " + pdfPath + ", but this computer cannot open a web browser automatically.",
+                        "Browser Unavailable");
+                return;
+            }
             try {
-                MessageFormat header = new MessageFormat("Pay Stub - " + employeeName + " (" + employeeId + ")");
-                MessageFormat footer = new MessageFormat("Page {0}");
-                if (txtReceipt.print(header, footer, true, null, null, true)) {
-                    UIHelper.showInfo(this, "Print job sent successfully!", "Print Success");
-                }
-            } catch (PrinterException pe) {
-                UIHelper.showError(this, "Printing failed: " + pe.getMessage(), "Print Error");
+                Desktop.getDesktop().browse(new File(pdfPath).toURI());
+            } catch (IOException | UnsupportedOperationException ex) {
+                UIHelper.showError(this, "PDF created at " + pdfPath + ", but the browser could not be opened: "
+                        + ex.getMessage(), "Unable to Open PDF");
             }
         });
 
         JButton btnClose = UIHelper.createButton("Close", new Color(148, 163, 184), Color.WHITE, e -> dispose());
-        buttons.add(btnPrint);
+        buttons.add(btnPdf);
         buttons.add(btnClose);
         bottomBar.add(buttons, BorderLayout.EAST);
 

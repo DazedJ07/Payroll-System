@@ -6,7 +6,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
- * Main - Entry point for the modern Staff Timekeeping and Payroll Application.
+ Main - Entry point for the Staff Timekeeping and Payroll Application.
  */
 public class Main {
     public static void main(String[] args) {

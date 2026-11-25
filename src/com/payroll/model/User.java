@@ -1,5 +1,7 @@
 package com.payroll.model;
 
+import java.util.Locale;
+
 /**
  * User - Model representing system user and employee credentials.
  */
@@ -51,18 +53,25 @@ public class User {
     }
 
     public String toCsv() {
-        return String.format("%s,%s,%s,%s,%s,%.2f",
+        return String.format(Locale.US, "%s,%s,%s,%s,%s,%.2f",
                 employeeId, name, username, password, role, hourlyRate);
     }
 
     public static User fromCsv(String line) {
         if (line == null || line.trim().isEmpty() || line.startsWith("#")) return null;
-        String[] parts = line.split(",");
-        if (parts.length >= 6) {
-            try {
-                return new User(parts[0].trim(), parts[1].trim(), parts[2].trim(),
-                        parts[3], parts[4].trim(), Double.parseDouble(parts[5].trim()));
-            } catch (NumberFormatException ignored) {}
+        String[] parts = line.split(",", -1);
+        try {
+            double hourlyRate;
+            if (parts.length == 6) {
+                hourlyRate = Double.parseDouble(parts[5].trim());
+            } else if (parts.length == 7) {
+                hourlyRate = Double.parseDouble(parts[5].trim() + "." + parts[6].trim());
+            } else {
+                return null;
+            }
+            return new User(parts[0].trim(), parts[1].trim(), parts[2].trim(),
+                    parts[3], parts[4].trim(), hourlyRate);
+        } catch (NumberFormatException ignored) {
         }
         return null;
     }

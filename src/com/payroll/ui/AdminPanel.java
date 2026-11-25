@@ -10,6 +10,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -24,12 +25,22 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 /**
- * AdminPanel - Complete employee CRUD, rate adjustments, and management operations.
+ AdminPanel
  */
 public class AdminPanel extends JPanel {
     private final DashboardFrame parentDashboard;
     private final DefaultTableModel tableModel;
     private final JTable table;
+    private final JButton btnAddEmployee;
+    private final JButton btnAdjustRate;
+    private final JButton btnGeneratePayStub;
+    private final JButton btnEditCredentials;
+    private final JButton btnResetPassword;
+    private final JButton btnArchive;
+    private final JButton btnDelete;
+    private final JButton btnRestore;
+    private final JButton btnToggleArchive;
+    private boolean archivedView;
 
     public AdminPanel(DashboardFrame parentDashboard) {
         this.parentDashboard = parentDashboard;
@@ -37,23 +48,40 @@ public class AdminPanel extends JPanel {
         setBackground(UIHelper.CARD_BG);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        JPanel toolbars = new JPanel(new GridLayout(2, 1, 0, 4));
+        JPanel toolbars = new JPanel(new GridLayout(3, 1, 0, 4));
         toolbars.setOpaque(false);
 
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
         row1.setOpaque(false);
-        row1.add(UIHelper.createButton("+ Add Employee", UIHelper.SUCCESS, Color.WHITE, e -> addEmployee()));
-        row1.add(UIHelper.createButton("Adjust Rate", new Color(14, 165, 233), Color.WHITE, e -> adjustRate()));
-        row1.add(UIHelper.createButton("Generate Pay Stub", UIHelper.PURPLE, Color.WHITE, e -> generatePayStub()));
+        btnAddEmployee = UIHelper.createButton("+ Add Employee", UIHelper.SUCCESS, Color.WHITE, e -> addEmployee());
+        btnAdjustRate = UIHelper.createButton("Adjust Rate", new Color(14, 165, 233), Color.WHITE, e -> adjustRate());
+        btnGeneratePayStub = UIHelper.createButton("Generate Pay Stub", UIHelper.PURPLE, Color.WHITE, e -> generatePayStub());
+        row1.add(btnAddEmployee);
+        row1.add(btnAdjustRate);
+        row1.add(btnGeneratePayStub);
         row1.add(UIHelper.createButton("Refresh", new Color(148, 163, 184), Color.WHITE, e -> refreshData()));
 
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
         row2.setOpaque(false);
-        row2.add(UIHelper.createButton("Edit Credentials", UIHelper.PRIMARY, Color.WHITE, e -> editCredentials()));
-        row2.add(UIHelper.createButton("Reset Password", UIHelper.WARNING, Color.WHITE, e -> resetPassword()));
+        btnEditCredentials = UIHelper.createButton("Edit Credentials", UIHelper.PRIMARY, Color.WHITE, e -> editCredentials());
+        btnResetPassword = UIHelper.createButton("Reset Password", UIHelper.WARNING, Color.WHITE, e -> resetPassword());
+        row2.add(btnEditCredentials);
+        row2.add(btnResetPassword);
+
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
+        row3.setOpaque(false);
+        btnArchive = UIHelper.createButton("Archive Employee", UIHelper.WARNING, Color.WHITE, e -> archiveSelectedEmployee());
+        btnDelete = UIHelper.createButton("Delete Employee", UIHelper.DANGER, Color.WHITE, e -> deleteSelectedEmployee());
+        btnRestore = UIHelper.createButton("Restore Employee", UIHelper.SUCCESS, Color.WHITE, e -> restoreSelectedEmployee());
+        btnToggleArchive = UIHelper.createButton("View Archived", new Color(100, 116, 139), Color.WHITE, e -> toggleArchivedView());
+        row3.add(btnArchive);
+        row3.add(btnDelete);
+        row3.add(btnRestore);
+        row3.add(btnToggleArchive);
 
         toolbars.add(row1);
         toolbars.add(row2);
+        toolbars.add(row3);
         add(toolbars, BorderLayout.NORTH);
 
         String[] cols = {"Employee ID", "Full Name", "Username", "Role", "Hourly Rate ($/hr)"};
@@ -68,18 +96,87 @@ public class AdminPanel extends JPanel {
         lblHint.setFont(UIHelper.FONT_SMALL);
         lblHint.setForeground(UIHelper.TEXT_MUTED);
         add(lblHint, BorderLayout.SOUTH);
+        updateActionAvailability();
     }
 
     public void refreshData() {
         tableModel.setRowCount(0);
-        for (User u : FileDao.loadUsers()) {
+        List<User> users = archivedView ? FileDao.loadArchivedUsers() : FileDao.loadUsers();
+        for (User u : users) {
             tableModel.addRow(new Object[]{
                     u.getEmployeeId(), u.getName(), u.getUsername(), u.getRole(), UIHelper.currency(u.getHourlyRate())
             });
         }
+        updateActionAvailability();
+    }
+
+    private void updateActionAvailability() {
+        btnAddEmployee.setEnabled(!archivedView);
+        btnAdjustRate.setEnabled(!archivedView);
+        btnGeneratePayStub.setEnabled(!archivedView);
+        btnEditCredentials.setEnabled(!archivedView);
+        btnResetPassword.setEnabled(!archivedView);
+        btnArchive.setEnabled(!archivedView);
+        btnRestore.setEnabled(archivedView);
+        btnToggleArchive.setText(archivedView ? "View Active" : "View Archived");
+    }
+
+    private void toggleArchivedView() {
+        archivedView = !archivedView;
+        refreshData();
+    }
+
+    private String getSelectedEmployeeId() {
+        int row = table.getSelectedRow();
+        if (row < 0) {
+            UIHelper.showWarning(this, "Select an employee row first.", "No Employee Selected");
+            return null;
+        }
+        return (String) tableModel.getValueAt(row, 0);
+    }
+
+    private void archiveSelectedEmployee() {
+        String employeeId = getSelectedEmployeeId();
+        if (employeeId == null) return;
+        String name = (String) tableModel.getValueAt(table.getSelectedRow(), 1);
+        if (!UIHelper.confirm(this, "Archive " + name + "? The account will be disabled, but its shift logs will be kept.",
+                "Confirm Archive")) return;
+        boolean archived = FileDao.archiveUser(employeeId);
+        parentDashboard.refreshAll();
+        if (!archived) {
+            UIHelper.showError(this, "Could not archive the selected employee.", "Archive Failed");
+        }
+    }
+
+    private void deleteSelectedEmployee() {
+        String employeeId = getSelectedEmployeeId();
+        if (employeeId == null) return;
+        String name = (String) tableModel.getValueAt(table.getSelectedRow(), 1);
+        if (!UIHelper.confirm(this, "Permanently delete " + name + "? Associated shift logs will be retained.",
+                "Confirm Delete")) return;
+        boolean deleted = FileDao.deleteUser(employeeId);
+        parentDashboard.refreshAll();
+        if (!deleted) {
+            UIHelper.showError(this, "Could not delete the selected employee.", "Delete Failed");
+        }
+    }
+
+    private void restoreSelectedEmployee() {
+        String employeeId = getSelectedEmployeeId();
+        if (employeeId == null) return;
+        boolean restored = FileDao.restoreUser(employeeId);
+        parentDashboard.refreshAll();
+        if (!restored) {
+            UIHelper.showError(this, "Could not restore the selected employee. Check for an active account with the same ID or username.",
+                    "Restore Failed");
+        }
     }
 
     private User getSelectedUser() {
+        if (archivedView) {
+            UIHelper.showWarning(this, "Switch to active employees to edit or generate a pay stub.", "Archived Employee");
+            return null;
+        }
         int row = table.getSelectedRow();
         if (row >= 0) {
             String empId = (String) tableModel.getValueAt(row, 0);
@@ -99,7 +196,7 @@ public class AdminPanel extends JPanel {
     private void addEmployee() {
         List<User> users = FileDao.loadUsers();
         JTextField txtId = UIHelper.createField(15);
-        txtId.setText(String.format("EMP%03d", users.size() + 1));
+        txtId.setText(nextEmployeeId(users));
         JTextField txtName = UIHelper.createField(15);
         JTextField txtUser = UIHelper.createField(15);
         JPasswordField[] pfHolder = new JPasswordField[1];
@@ -139,6 +236,23 @@ public class AdminPanel extends JPanel {
         } catch (Exception ex) {
             UIHelper.showError(this, "Please enter a valid positive hourly rate.", "Input Error");
         }
+    }
+
+    private String nextEmployeeId(List<User> activeUsers) {
+        List<User> allUsers = new ArrayList<User>(activeUsers);
+        allUsers.addAll(FileDao.loadArchivedUsers());
+        int nextId = 1;
+        while (containsEmployeeId(allUsers, String.format("EMP%03d", nextId))) {
+            nextId++;
+        }
+        return String.format("EMP%03d", nextId);
+    }
+
+    private boolean containsEmployeeId(List<User> users, String employeeId) {
+        for (User user : users) {
+            if (user.getEmployeeId().equalsIgnoreCase(employeeId)) return true;
+        }
+        return false;
     }
 
     private void editCredentials() {
